@@ -9,7 +9,7 @@ wget -O- http://example.com/ --timeout=5 >/dev/null 2>&1
 """
 
 SCRIPT = """
-cat > /tmp/timeout.sh << 'SCRIPT'
+cat > /home/root/timeout.sh << 'SCRIPT'
 #!/bin/sh
 
 # Execute a command with a timeout
@@ -69,7 +69,7 @@ wait $a                  #wait for watchit to finish cleanup
 exit $RET                #return the value
 SCRIPT
 
-cat > /tmp/setupwifi.sh << 'SCRIPT'
+cat > /home/root/setupwifi.sh << 'SCRIPT'
 
 # Delete old files
 rm /mnt/rootfs.rw/lib/modules/3.10.17-rt12-*/kernel/net/ipv4/netfilter/iptable_filter.ko || true
@@ -95,7 +95,7 @@ sleep 2
 echo 'connecting to the internet...'
 wpa_supplicant -i wlan0 -c /etc/wpa_client.conf -B
 
-/tmp/timeout.sh 15 udhcpc -i wlan0 || {{
+/home/root/timeout.sh 15 udhcpc -i wlan0 || {{
     echo -e "\\nerror: wrong credentials or couldn't connect to wifi network!\\n"
     ifconfig wlan0 down
 }}
@@ -122,9 +122,10 @@ fi
 
 SCRIPT
 
-chmod +x /tmp/timeout.sh
-chmod +x /tmp/setupwifi.sh
-bash /tmp/setupwifi.sh > /log/setupwifi.log 2>&1
+chmod +x /home/root/timeout.sh
+chmod +x /home/root/setupwifi.sh
+sed -i '/exit 0/i bash /home/root/setupwifi.sh' /etc/rc.local
+bash /home/root/setupwifi.sh > /log/setupwifi.log 2>&1
 """
 
 def main(args):
